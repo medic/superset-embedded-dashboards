@@ -36,12 +36,33 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm p-8 bg-white rounded-lg shadow">
-        <h1 className="text-2xl font-semibold text-center mb-6">Dashboard Portal</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{
+        background: 'radial-gradient(ellipse at top, #f1f0ed 0%, var(--login-bg) 60%)',
+      }}
+    >
+      <div className="w-full max-w-sm p-10 pt-12 bg-white rounded-2xl shadow-lg shadow-stone-200/60 border border-stone-200/60 animate-fade-in-up">
+        <div className="text-center mb-10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/coat-of-arms.png"
+            alt="CHIS Ministry of Health"
+            width={273}
+            height={73}
+            className="mx-auto mb-6"
+          />
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-800">
+            Superset Dashboards
+          </h1>
+          <p className="mt-1.5 text-sm text-slate-400 font-medium">
+            Sign in to continue
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="username" className="block text-sm font-medium text-slate-600 mb-1.5">
               Username
             </label>
             <input
@@ -50,12 +71,14 @@ export default function LoginPage() {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
+              className="block w-full rounded-lg border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-slate-800 placeholder:text-slate-300 transition-all duration-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white focus:outline-none"
               autoComplete="username"
+              placeholder="Enter your username"
             />
           </div>
+
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-slate-600 mb-1.5">
               Password
             </label>
             <input
@@ -64,19 +87,37 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
+              className="block w-full rounded-lg border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-slate-800 placeholder:text-slate-300 transition-all duration-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white focus:outline-none"
               autoComplete="current-password"
+              placeholder="Enter your password"
             />
           </div>
+
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100">
+              <svg className="w-4 h-4 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
           )}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            className="w-full py-2.5 px-4 text-white text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            style={{ backgroundColor: '#1a9bd2' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1589ba'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1a9bd2'}
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin-slow" />
+                Signing in...
+              </>
+            ) : (
+              'Sign in'
+            )}
           </button>
         </form>
       </div>
