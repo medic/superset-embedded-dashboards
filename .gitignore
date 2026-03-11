@@ -39,6 +39,14 @@ next-env.d.ts
 .dolt/
 *.db
 .claude
+.beads
 
 # env files
 .env
+
+# editor/IDE settings
+.vscode/
+.idea/
+
+# other caches
+*.log          
