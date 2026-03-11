@@ -48,7 +48,10 @@ describe('authenticateCht', () => {
   });
 
   it('throws on invalid credentials (401)', async () => {
-    mockedAxios.post.mockRejectedValueOnce({ response: { status: 401 } });
+    const axiosError = new Error('Request failed') as Error & { response: { status: number }; isAxiosError: boolean };
+    axiosError.response = { status: 401 };
+    axiosError.isAxiosError = true;
+    mockedAxios.post.mockRejectedValueOnce(axiosError);
 
     await expect(authenticateCht(chtDomain, 'bad', 'creds'))
       .rejects.toThrow('Invalid username or password');
