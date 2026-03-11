@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Allow static files and Next.js internals
-  if (pathname.startsWith('/_next') || pathname.startsWith('/favicon')) {
+  if (pathname.startsWith('/_next') || pathname.startsWith('/favicon') || pathname.match(/\.(png|jpg|jpeg|svg|gif|ico|webp)$/)) {
     return NextResponse.next();
   }
 
