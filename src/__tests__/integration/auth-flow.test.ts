@@ -1,4 +1,5 @@
 // src/__tests__/integration/auth-flow.test.ts
+import jwt from 'jsonwebtoken';
 import { createSessionToken, verifySessionToken } from '@/lib/session';
 import { buildRlsClause } from '@/lib/superset';
 
@@ -27,6 +28,15 @@ describe('Auth → Token flow (unit integration)', () => {
 
   it('rejects tampered facility IDs in RLS', () => {
     expect(() => buildRlsClause(["'; DROP TABLE users--"])).toThrow('Invalid facility_id format');
+  });
+
+  it('JWT tokens use HS256 algorithm (required for jose middleware compatibility)', () => {
+    const token = createSessionToken(
+      { username: 'cha_test', facilityIds: ['fac-1'] },
+      secret
+    );
+    const decoded = jwt.decode(token, { complete: true });
+    expect(decoded?.header.alg).toBe('HS256');
   });
 
   it('rejects expired session before RLS generation', () => {

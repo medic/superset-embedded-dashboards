@@ -50,9 +50,18 @@ function requireEnv(name: string): string {
  * console.log(config.dashboards); // e.g. [{ id: "abc", name: "My Dashboard" }]
  * ```
  */
+let _cached: AppConfig | null = null;
+
 export function getConfig(): AppConfig {
+  if (_cached) return _cached;
+
   for (const name of REQUIRED_VARS) {
     requireEnv(name);
+  }
+
+  const cookieSecret = requireEnv('COOKIE_SECRET');
+  if (cookieSecret.length < 32) {
+    throw new Error('COOKIE_SECRET must be at least 32 characters');
   }
 
   let dashboards: DashboardConfig[];
@@ -63,12 +72,18 @@ export function getConfig(): AppConfig {
     throw new Error('DASHBOARDS must be a valid JSON array');
   }
 
-  return {
+  _cached = {
     chtDomain: requireEnv('CHT_DOMAIN'),
     supersetUrl: requireEnv('SUPERSET_URL'),
     supersetUsername: requireEnv('SUPERSET_USERNAME'),
     supersetPassword: requireEnv('SUPERSET_PASSWORD'),
-    cookieSecret: requireEnv('COOKIE_SECRET'),
+    cookieSecret,
     dashboards,
   };
+  return _cached;
+}
+
+/** Clears the cached config. Useful for testing. */
+export function clearConfigCache(): void {
+  _cached = null;
 }

@@ -12,7 +12,13 @@ export default function SupersetEmbed({ dashboardId, supersetDomain }: SupersetE
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Clear previous embed (safe: only removes SDK-created iframe children)
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
 
     const fetchGuestToken = async (): Promise<string> => {
       const res = await fetch('/api/superset/token', {
@@ -28,7 +34,7 @@ export default function SupersetEmbed({ dashboardId, supersetDomain }: SupersetE
     embedDashboard({
       id: dashboardId,
       supersetDomain,
-      mountPoint: containerRef.current,
+      mountPoint: container,
       fetchGuestToken,
       dashboardUiConfig: {
         hideTitle: false,
@@ -37,6 +43,12 @@ export default function SupersetEmbed({ dashboardId, supersetDomain }: SupersetE
         filters: { visible: true, expanded: false },
       },
     });
+
+    return () => {
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+    };
   }, [dashboardId, supersetDomain]);
 
   return (

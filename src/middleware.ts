@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
 
   try {
     const secret = new TextEncoder().encode(process.env.COOKIE_SECRET);
-    await jwtVerify(token, secret);
+    await jwtVerify(token, secret, { algorithms: ['HS256'] });
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL('/login', request.url));

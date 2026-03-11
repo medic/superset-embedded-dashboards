@@ -4,17 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SupersetEmbed from '@/components/SupersetEmbed';
-
-interface Dashboard {
-  id: string;
-  name: string;
-}
+import { DashboardConfig } from '@/lib/config';
 
 export default function DashboardViewPage() {
   const params = useParams();
   const router = useRouter();
   const dashboardId = params.id as string;
-  const [dashboards, setDashboards] = useState<Dashboard[]>([]);
+  const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
   const supersetDomain = process.env.NEXT_PUBLIC_SUPERSET_URL || '';
 
   useEffect(() => {

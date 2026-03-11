@@ -76,16 +76,32 @@ export interface GuestTokenParams {
  * // token is a JWT string for the Superset Embedded SDK
  * ```
  */
-export async function generateGuestToken(params: GuestTokenParams): Promise<string> {
-  const { supersetUrl, supersetUsername, supersetPassword, dashboardId, facilityIds, username } = params;
+let cachedAccessToken: { token: string; expiresAt: number } | null = null;
+const TOKEN_TTL_MS = 4 * 60 * 1000; // 4 minutes (Superset tokens last ~5 min)
+
+async function getSupersetAccessToken(supersetUrl: string, username: string, password: string): Promise<string> {
+  if (cachedAccessToken && Date.now() < cachedAccessToken.expiresAt) {
+    return cachedAccessToken.token;
+  }
 
   const loginResp = await axios.post(`${supersetUrl}/api/v1/security/login`, {
-    username: supersetUsername,
-    password: supersetPassword,
+    username,
+    password,
     provider: 'db',
     refresh: true,
   });
-  const accessToken = loginResp.data.access_token;
+
+  cachedAccessToken = {
+    token: loginResp.data.access_token,
+    expiresAt: Date.now() + TOKEN_TTL_MS,
+  };
+  return cachedAccessToken.token;
+}
+
+export async function generateGuestToken(params: GuestTokenParams): Promise<string> {
+  const { supersetUrl, supersetUsername, supersetPassword, dashboardId, facilityIds, username } = params;
+
+  const accessToken = await getSupersetAccessToken(supersetUrl, supersetUsername, supersetPassword);
 
   const guestResp = await axios.post(
     `${supersetUrl}/api/v1/security/guest_token/`,

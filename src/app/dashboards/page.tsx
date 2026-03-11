@@ -3,15 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
-interface Dashboard {
-  id: string;
-  name: string;
-}
+import { DashboardConfig } from '@/lib/config';
 
 export default function DashboardsPage() {
   const router = useRouter();
-  const [dashboards, setDashboards] = useState<Dashboard[]>([]);
+  const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

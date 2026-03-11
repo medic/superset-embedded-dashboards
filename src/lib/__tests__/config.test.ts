@@ -1,10 +1,11 @@
-import { getConfig } from '../config';
+import { getConfig, clearConfigCache } from '../config';
 
 describe('getConfig', () => {
   const ORIGINAL_ENV = process.env;
 
   beforeEach(() => {
     jest.resetModules();
+    clearConfigCache();
     process.env = { ...ORIGINAL_ENV };
   });
 
@@ -43,5 +44,16 @@ describe('getConfig', () => {
     process.env.DASHBOARDS = 'not-json';
 
     expect(() => getConfig()).toThrow('DASHBOARDS must be a valid JSON array');
+  });
+
+  it('throws if COOKIE_SECRET is too short', () => {
+    process.env.CHT_DOMAIN = 'https://cht.test.com';
+    process.env.SUPERSET_URL = 'https://superset.test.com';
+    process.env.SUPERSET_USERNAME = 'admin';
+    process.env.SUPERSET_PASSWORD = 'secret';
+    process.env.COOKIE_SECRET = 'too-short';
+    process.env.DASHBOARDS = '[{"id":"d1","name":"Dashboard 1"}]';
+
+    expect(() => getConfig()).toThrow('COOKIE_SECRET must be at least 32 characters');
   });
 });
