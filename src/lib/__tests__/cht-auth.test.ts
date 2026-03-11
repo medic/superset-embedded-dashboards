@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { authenticateCht, ChtUser } from '../cht-auth';
+import { authenticateCht } from '../cht-auth';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;

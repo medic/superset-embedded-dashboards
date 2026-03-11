@@ -54,8 +54,8 @@ export async function authenticateCht(
       throw new Error('No auth cookie received');
     }
     sessionCookie = authCookie.split(';')[0];
-  } catch (err: any) {
-    if (err?.response?.status === 401) {
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && err.response?.status === 401) {
       throw new Error('Invalid username or password');
     }
     throw err;

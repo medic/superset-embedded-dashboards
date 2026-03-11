@@ -34,7 +34,7 @@ export interface SessionPayload {
  * ```
  */
 export function createSessionToken(payload: SessionPayload, secret: string, expiresIn: string = '24h'): string {
-  return jwt.sign(payload, secret, { expiresIn });
+  return jwt.sign(payload, secret, { expiresIn: expiresIn as unknown as number });
 }
 
 /**
