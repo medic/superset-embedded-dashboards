@@ -1,36 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateCht } from '@/lib/cht-auth';
 import { createSessionToken } from '@/lib/session';
-import { getConfig } from '@/lib/config';
+import { getConfig, getCounties } from '@/lib/config';
 
 /**
- * Handles user login by authenticating against CHT and issuing a session cookie.
+ * Handles user login by authenticating against the selected county's CHT instance.
  *
- * Expects a JSON body with `username` and `password`. On success, sets an `AuthToken`
- * httpOnly cookie containing a signed JWT and returns the authenticated username.
+ * Expects a JSON body with `county` (domain string), `username`, and `password`.
+ * Validates the county against counties.json, authenticates against that county's
+ * CouchDB, then sets an `AuthToken` httpOnly cookie containing a signed JWT.
  *
- * @param request - The incoming request with JSON body `{ username, password }`.
+ * @param request - The incoming request with JSON body `{ county, username, password }`.
  * @returns JSON `{ username }` on success, or `{ error }` with appropriate status code.
  *
  * @example
  * ```typescript
  * // POST /api/auth/login
- * // Body: { "username": "cha_jane", "password": "s3cret" }
+ * // Body: { "county": "nairobi.echis.go.ke", "username": "cha_jane", "password": "s3cret" }
  * // Response 200: { "username": "cha_jane" }
  * // Sets cookie: AuthToken=<jwt>
  * ```
  */
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json();
-    if (!username || !password) {
-      return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
+    const { county, username, password } = await request.json();
+    if (!county || !username || !password) {
+      return NextResponse.json({ error: 'County, username, and password are required' }, { status: 400 });
     }
 
+    const counties = getCounties();
+    const validCounty = counties.find((c) => c.domain === county);
+    if (!validCounty) {
+      return NextResponse.json({ error: 'Invalid county selected' }, { status: 400 });
+    }
+
+    const chtDomain = `https://${validCounty.domain}`;
     const config = getConfig();
-    const user = await authenticateCht(config.chtDomain, username, password);
+    const user = await authenticateCht(chtDomain, username, password);
     const token = createSessionToken(
-      { username: user.username, facilityIds: user.facilityIds },
+      { username: user.username, facilityIds: user.facilityIds, county: validCounty.domain },
       config.cookieSecret
     );
 
