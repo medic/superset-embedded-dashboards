@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as Sentry from '@sentry/nextjs';
 import { verifySessionToken } from '@/lib/session';
 import { getConfig } from '@/lib/config';
 
@@ -29,8 +28,7 @@ export async function GET(request: NextRequest) {
     const config = getConfig();
     verifySessionToken(authToken, config.cookieSecret);
     return NextResponse.json({ dashboards: config.dashboards });
-  } catch (err: unknown) {
-    Sentry.captureException(err, { tags: { route: 'dashboards' } });
+  } catch {
     return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
   }
 }

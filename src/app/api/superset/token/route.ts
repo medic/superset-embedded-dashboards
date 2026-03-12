@@ -28,10 +28,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
+  const config = getConfig();
+  let session;
   try {
-    const config = getConfig();
-    const session = verifySessionToken(authToken, config.cookieSecret);
+    session = verifySessionToken(authToken, config.cookieSecret);
+  } catch {
+    return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+  }
 
+  try {
     const { dashboardId } = await request.json();
     if (!dashboardId) {
       return NextResponse.json({ error: 'dashboardId is required' }, { status: 400 });
