@@ -1,16 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-
-interface County {
-  name: string;
-  domain: string;
-}
+import type { County } from '@/lib/config';
 
 interface CountySelectorProps {
   counties: County[];
   value: string;
   onChange: (domain: string) => void;
+  id?: string;
 }
 
 /**
@@ -26,7 +23,7 @@ interface CountySelectorProps {
  * />
  * ```
  */
-export default function CountySelector({ counties, value, onChange }: CountySelectorProps) {
+export default function CountySelector({ counties, value, onChange, id }: CountySelectorProps) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -102,10 +99,13 @@ export default function CountySelector({ counties, value, onChange }: CountySele
     <div ref={containerRef} className="relative">
       <div className="relative">
         <input
+          id={id}
           type="text"
           role="combobox"
           aria-expanded={isOpen}
           aria-haspopup="listbox"
+          aria-controls="county-listbox"
+          aria-required="true"
           aria-activedescendant={isOpen && filtered[highlightedIndex] ? `county-${filtered[highlightedIndex].domain}` : undefined}
           value={isOpen ? query : (selectedCounty?.name || query)}
           onChange={(e) => {
@@ -134,6 +134,7 @@ export default function CountySelector({ counties, value, onChange }: CountySele
 
       {isOpen && filtered.length > 0 && (
         <ul
+          id="county-listbox"
           ref={listRef}
           role="listbox"
           className="absolute z-10 mt-1 w-full max-h-48 overflow-auto rounded-lg border border-stone-200 bg-white shadow-lg shadow-stone-200/40"

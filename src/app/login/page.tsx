@@ -75,6 +75,7 @@ export default function LoginPage() {
               County
             </label>
             <CountySelector
+              id="county"
               counties={counties}
               value={county}
               onChange={setCounty}
