@@ -5,6 +5,7 @@ describe('session tokens', () => {
   const payload: SessionPayload = {
     username: 'cha_user',
     facilityIds: ['facility-001', 'facility-002'],
+    county: 'nairobi.echis.go.ke',
   };
 
   it('creates and verifies a valid token', () => {
@@ -12,6 +13,7 @@ describe('session tokens', () => {
     const decoded = verifySessionToken(token, secret);
     expect(decoded.username).toBe('cha_user');
     expect(decoded.facilityIds).toEqual(['facility-001', 'facility-002']);
+    expect(decoded.county).toBe('nairobi.echis.go.ke');
   });
 
   it('throws on invalid token', () => {

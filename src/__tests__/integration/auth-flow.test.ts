@@ -14,13 +14,14 @@ describe('Auth → Token flow (unit integration)', () => {
     };
 
     const token = createSessionToken(
-      { username: user.username, facilityIds: user.facilityIds },
+      { username: user.username, facilityIds: user.facilityIds, county: 'nairobi.echis.go.ke' },
       secret
     );
 
     const session = verifySessionToken(token, secret);
     expect(session.username).toBe('cha_test');
     expect(session.facilityIds).toEqual(['facility-100', 'facility-200']);
+    expect(session.county).toBe('nairobi.echis.go.ke');
 
     const rls = buildRlsClause(session.facilityIds);
     expect(rls).toBe("facility_id IN ('facility-100', 'facility-200')");
@@ -32,7 +33,7 @@ describe('Auth → Token flow (unit integration)', () => {
 
   it('JWT tokens use HS256 algorithm (required for jose middleware compatibility)', () => {
     const token = createSessionToken(
-      { username: 'cha_test', facilityIds: ['fac-1'] },
+      { username: 'cha_test', facilityIds: ['fac-1'], county: 'test.echis.go.ke' },
       secret
     );
     const decoded = jwt.decode(token, { complete: true });
@@ -41,7 +42,7 @@ describe('Auth → Token flow (unit integration)', () => {
 
   it('rejects expired session before RLS generation', () => {
     const token = createSessionToken(
-      { username: 'cha_test', facilityIds: ['fac-1'] },
+      { username: 'cha_test', facilityIds: ['fac-1'], county: 'test.echis.go.ke' },
       secret,
       '0s'
     );

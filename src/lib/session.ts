@@ -8,12 +8,14 @@ import jwt, { SignOptions } from 'jsonwebtoken';
  * const payload: SessionPayload = {
  *   username: 'cha_user',
  *   facilityIds: ['facility-001'],
+ *   county: 'nairobi.echis.go.ke',
  * };
  * ```
  */
 export interface SessionPayload {
   username: string;
   facilityIds: string[];
+  county: string;
 }
 
 /**
@@ -27,7 +29,7 @@ export interface SessionPayload {
  * @example
  * ```typescript
  * const token = createSessionToken(
- *   { username: 'cha_user', facilityIds: ['f1'] },
+ *   { username: 'cha_user', facilityIds: ['f1'], county: 'nairobi.echis.go.ke' },
  *   'my-secret-key-at-least-32-chars!!',
  * );
  * // token is a dot-separated JWT string
@@ -55,5 +57,5 @@ export function createSessionToken(payload: SessionPayload, secret: string, expi
  */
 export function verifySessionToken(token: string, secret: string): SessionPayload {
   const decoded = jwt.verify(token, secret) as SessionPayload;
-  return { username: decoded.username, facilityIds: decoded.facilityIds };
+  return { username: decoded.username, facilityIds: decoded.facilityIds, county: decoded.county };
 }
