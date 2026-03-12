@@ -2,9 +2,12 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import CountySelector from '@/components/CountySelector';
+import counties from '../../../counties.json';
 
 export default function LoginPage() {
   const router = useRouter();
+  const [county, setCounty] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,13 +16,19 @@ export default function LoginPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
+
+    if (!county) {
+      setError('Please select your county');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ county, username, password }),
       });
 
       if (!res.ok) {
@@ -61,6 +70,17 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="county" className="block text-sm font-medium text-slate-600 mb-1.5">
+              County
+            </label>
+            <CountySelector
+              counties={counties}
+              value={county}
+              onChange={setCounty}
+            />
+          </div>
+
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-slate-600 mb-1.5">
               Username
