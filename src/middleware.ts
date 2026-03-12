@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { jwtVerify } from 'jose';
 
 const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/health'];
@@ -25,7 +26,8 @@ export async function middleware(request: NextRequest) {
     const secret = new TextEncoder().encode(process.env.COOKIE_SECRET);
     await jwtVerify(token, secret, { algorithms: ['HS256'] });
     return NextResponse.next();
-  } catch {
+  } catch (err: unknown) {
+    Sentry.captureException(err, { tags: { component: 'middleware' } });
     return NextResponse.redirect(new URL('/login', request.url));
   }
 }
