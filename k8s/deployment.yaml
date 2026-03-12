@@ -55,6 +55,11 @@ spec:
                 configMapKeyRef:
                   name: cha-dashboard-config
                   key: dashboards
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: cha-dashboard-secrets
+                  key: sentry-dsn
           readinessProbe:
             httpGet:
               path: /api/health
