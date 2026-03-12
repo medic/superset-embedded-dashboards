@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { authenticateCht } from '@/lib/cht-auth';
 import { createSessionToken } from '@/lib/session';
 import { getConfig, getCounties } from '@/lib/config';
@@ -55,6 +56,9 @@ export async function POST(request: NextRequest) {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Authentication failed';
     const status = message.includes('Invalid username') ? 401 : 500;
+    if (status === 500) {
+      Sentry.captureException(err, { tags: { route: 'auth/login' } });
+    }
     return NextResponse.json({ error: message }, { status });
   }
 }
