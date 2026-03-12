@@ -62,7 +62,7 @@ export async function authenticateCht(
     throw err;
   }
 
-  const userDocUrl = `${chtDomain}/medic/org.couchdb.user:${username}`;
+  const userDocUrl = `${chtDomain}/medic/org.couchdb.user:${encodeURIComponent(username)}`;
   const { data: userDoc } = await axios.get(userDocUrl, {
     headers: { Cookie: sessionCookie },
   });
