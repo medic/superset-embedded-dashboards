@@ -1,10 +1,19 @@
+import countiesData from '../../counties.json';
+
+/**
+ * Represents a county with its CHT instance domain.
+ */
+export interface County {
+  name: string;
+  domain: string;
+}
+
 export interface DashboardConfig {
   id: string;
   name: string;
 }
 
 export interface AppConfig {
-  chtDomain: string;
   supersetUrl: string;
   supersetUsername: string;
   supersetPassword: string;
@@ -13,7 +22,6 @@ export interface AppConfig {
 }
 
 const REQUIRED_VARS = [
-  'CHT_DOMAIN',
   'SUPERSET_URL',
   'SUPERSET_USERNAME',
   'SUPERSET_PASSWORD',
@@ -36,6 +44,8 @@ function requireEnv(name: string): string {
   return value;
 }
 
+let _cached: AppConfig | null = null;
+
 /**
  * Reads and validates all required environment variables, returning a typed application config.
  *
@@ -44,14 +54,11 @@ function requireEnv(name: string): string {
  *
  * @example
  * ```typescript
- * // With all env vars set:
  * const config = getConfig();
- * console.log(config.chtDomain); // e.g. "https://cht.example.com"
+ * console.log(config.supersetUrl); // e.g. "https://superset.example.com"
  * console.log(config.dashboards); // e.g. [{ id: "abc", name: "My Dashboard" }]
  * ```
  */
-let _cached: AppConfig | null = null;
-
 export function getConfig(): AppConfig {
   if (_cached) return _cached;
 
@@ -73,7 +80,6 @@ export function getConfig(): AppConfig {
   }
 
   _cached = {
-    chtDomain: requireEnv('CHT_DOMAIN'),
     supersetUrl: requireEnv('SUPERSET_URL'),
     supersetUsername: requireEnv('SUPERSET_USERNAME'),
     supersetPassword: requireEnv('SUPERSET_PASSWORD'),
@@ -86,4 +92,20 @@ export function getConfig(): AppConfig {
 /** Clears the cached config. Useful for testing. */
 export function clearConfigCache(): void {
   _cached = null;
+}
+
+/**
+ * Returns the list of counties from counties.json.
+ * Used by the login API to validate county domains and by the login page for the dropdown.
+ *
+ * @returns Array of county objects with name and domain.
+ *
+ * @example
+ * ```typescript
+ * const counties = getCounties();
+ * console.log(counties[0]); // { name: "Baringo", domain: "baringo.echis.go.ke" }
+ * ```
+ */
+export function getCounties(): County[] {
+  return countiesData as County[];
 }
