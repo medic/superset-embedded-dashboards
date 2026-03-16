@@ -24,7 +24,7 @@ describe('Auth → Token flow (unit integration)', () => {
     expect(session.county).toBe('nairobi.echis.go.ke');
 
     const rls = buildRlsClause(session.facilityIds);
-    expect(rls).toBe("facility_id IN ('facility-100', 'facility-200')");
+    expect(rls).toBe("chu_code IN ('facility-100', 'facility-200')");
   });
 
   it('rejects tampered facility IDs in RLS', () => {

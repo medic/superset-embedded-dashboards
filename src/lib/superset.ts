@@ -8,13 +8,13 @@ const FACILITY_ID_PATTERN = /^[a-zA-Z0-9_-]+$/;
  * allowlist pattern to prevent SQL injection.
  *
  * @param facilityIds - Array of facility ID strings (alphanumeric, hyphens, underscores only).
- * @returns A SQL `IN` clause string, e.g. `"facility_id IN ('fac-001', 'fac-002')"`.
+ * @returns A SQL `IN` clause string, e.g. `"chu_code IN ('fac-001', 'fac-002')"`.
  * @throws Error if the array is empty or any ID contains disallowed characters.
  *
  * @example
  * ```typescript
  * const clause = buildRlsClause(['fac-001', 'fac-002']);
- * // => "facility_id IN ('fac-001', 'fac-002')"
+ * // => "chu_code IN ('fac-001', 'fac-002')"
  * ```
  */
 export function buildRlsClause(facilityIds: string[]): string {
@@ -27,7 +27,7 @@ export function buildRlsClause(facilityIds: string[]): string {
     }
   }
   const quoted = facilityIds.map((id) => `'${id}'`).join(', ');
-  return `facility_id IN (${quoted})`;
+  return `chu_code IN (${quoted})`;
 }
 
 /**
@@ -54,6 +54,66 @@ export interface GuestTokenParams {
   username: string;
 }
 
+let cachedAuth: { accessToken: string; csrfToken: string; csrfCookie: string; expiresAt: number } | null = null;
+const TOKEN_TTL_MS = 4 * 60 * 1000; // 4 minutes (Superset tokens last ~5 min)
+
+/** Resets the auth cache. Exported for use in tests only. */
+export function resetAuthCache(): void {
+  cachedAuth = null;
+}
+
+async function getSupersetAuth(
+  supersetUrl: string,
+  username: string,
+  password: string
+): Promise<{ accessToken: string; csrfToken: string; csrfCookie: string }> {
+  if (cachedAuth && Date.now() < cachedAuth.expiresAt) {
+    console.log('[superset] Using cached auth');
+    const { accessToken, csrfToken, csrfCookie } = cachedAuth;
+    return { accessToken, csrfToken, csrfCookie };
+  }
+
+  const loginEndpoint = `${supersetUrl}/api/v1/security/login`;
+  console.log('[superset] Requesting access token', { endpoint: loginEndpoint, username });
+  let accessToken: string;
+  try {
+    const loginResp = await axios.post(loginEndpoint, {
+      username,
+      password,
+      provider: 'db',
+      refresh: true,
+    });
+    accessToken = loginResp.data.access_token;
+    console.log('[superset] Access token obtained successfully');
+  } catch (err: unknown) {
+    const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+    const data = axios.isAxiosError(err) ? err.response?.data : undefined;
+    console.error('[superset] Failed to obtain access token', { endpoint: loginEndpoint, status, data: JSON.stringify(data) });
+    throw err;
+  }
+
+  const csrfEndpoint = `${supersetUrl}/api/v1/security/csrf_token/`;
+  console.log('[superset] Requesting CSRF token', { endpoint: csrfEndpoint });
+  let csrfToken: string;
+  let csrfCookie: string;
+  try {
+    const csrfResp = await axios.get(csrfEndpoint, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    csrfToken = csrfResp.data.result;
+    csrfCookie = csrfResp.headers['set-cookie']?.join('; ') ?? '';
+    console.log('[superset] CSRF token obtained successfully');
+  } catch (err: unknown) {
+    const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+    const data = axios.isAxiosError(err) ? err.response?.data : undefined;
+    console.error('[superset] Failed to obtain CSRF token', { endpoint: csrfEndpoint, status, data: JSON.stringify(data) });
+    throw err;
+  }
+
+  cachedAuth = { accessToken, csrfToken, csrfCookie, expiresAt: Date.now() + TOKEN_TTL_MS };
+  return { accessToken, csrfToken, csrfCookie };
+}
+
 /**
  * Authenticates against a Superset instance using the admin credentials, then
  * requests a guest token scoped to a specific dashboard with row-level security
@@ -76,42 +136,33 @@ export interface GuestTokenParams {
  * // token is a JWT string for the Superset Embedded SDK
  * ```
  */
-let cachedAccessToken: { token: string; expiresAt: number } | null = null;
-const TOKEN_TTL_MS = 4 * 60 * 1000; // 4 minutes (Superset tokens last ~5 min)
-
-async function getSupersetAccessToken(supersetUrl: string, username: string, password: string): Promise<string> {
-  if (cachedAccessToken && Date.now() < cachedAccessToken.expiresAt) {
-    return cachedAccessToken.token;
-  }
-
-  const loginResp = await axios.post(`${supersetUrl}/api/v1/security/login`, {
-    username,
-    password,
-    provider: 'db',
-    refresh: true,
-  });
-
-  cachedAccessToken = {
-    token: loginResp.data.access_token,
-    expiresAt: Date.now() + TOKEN_TTL_MS,
-  };
-  return cachedAccessToken.token;
-}
-
 export async function generateGuestToken(params: GuestTokenParams): Promise<string> {
   const { supersetUrl, supersetUsername, supersetPassword, dashboardId, facilityIds, username } = params;
 
-  const accessToken = await getSupersetAccessToken(supersetUrl, supersetUsername, supersetPassword);
+  const { accessToken, csrfToken, csrfCookie } = await getSupersetAuth(supersetUrl, supersetUsername, supersetPassword);
 
-  const guestResp = await axios.post(
-    `${supersetUrl}/api/v1/security/guest_token/`,
-    {
-      user: { username, first_name: username, last_name: '' },
-      resources: [{ type: 'dashboard', id: dashboardId }],
-      rls: [{ clause: buildRlsClause(facilityIds) }],
-    },
-    { headers: { Authorization: `Bearer ${accessToken}` } }
-  );
+  const guestEndpoint = `${supersetUrl}/api/v1/security/guest_token/`;
+  const payload = {
+    user: { username, first_name: username, last_name: '' },
+    resources: [{ type: 'dashboard', id: dashboardId }],
+    rls: [{ clause: buildRlsClause(facilityIds) }],
+  };
+  console.log('[superset] Requesting guest token', { endpoint: guestEndpoint, dashboardId, username, facilityIds });
 
-  return guestResp.data.token;
+  try {
+    const guestResp = await axios.post(guestEndpoint, payload, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-CSRFToken': csrfToken,
+        Cookie: csrfCookie,
+      },
+    });
+    console.log('[superset] Guest token obtained successfully');
+    return guestResp.data.token;
+  } catch (err: unknown) {
+    const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+    const data = axios.isAxiosError(err) ? err.response?.data : undefined;
+    console.error('[superset] Failed to obtain guest token', { endpoint: guestEndpoint, dashboardId, status, data: JSON.stringify(data) });
+    throw err;
+  }
 }
