@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const { dashboardId } = await request.json();
+    console.log('[token] Guest token request received', { dashboardId, username: session.username });
     if (!dashboardId) {
       return NextResponse.json({ error: 'dashboardId is required' }, { status: 400 });
     }

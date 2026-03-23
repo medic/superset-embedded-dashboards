@@ -5,10 +5,9 @@ import { embedDashboard } from '@superset-ui/embedded-sdk';
 
 interface SupersetEmbedProps {
   dashboardId: string;
-  supersetDomain: string;
 }
 
-export default function SupersetEmbed({ dashboardId, supersetDomain }: SupersetEmbedProps) {
+export default function SupersetEmbed({ dashboardId }: SupersetEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,11 +30,14 @@ export default function SupersetEmbed({ dashboardId, supersetDomain }: SupersetE
       return data.token;
     };
 
+    const proxyDomain = `${window.location.origin}/api/superset-proxy`;
+
     embedDashboard({
       id: dashboardId,
-      supersetDomain,
+      supersetDomain: proxyDomain,
       mountPoint: container,
       fetchGuestToken,
+      referrerPolicy: 'strict-origin-when-cross-origin',
       dashboardUiConfig: {
         hideTitle: false,
         hideTab: false,
@@ -49,7 +51,7 @@ export default function SupersetEmbed({ dashboardId, supersetDomain }: SupersetE
         container.removeChild(container.firstChild);
       }
     };
-  }, [dashboardId, supersetDomain]);
+  }, [dashboardId]);
 
   return (
     <div ref={containerRef} className="w-full h-full min-h-[calc(100vh-4rem)]">
