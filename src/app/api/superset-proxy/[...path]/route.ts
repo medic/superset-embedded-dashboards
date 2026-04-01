@@ -61,6 +61,10 @@ async function proxyRequest(request: NextRequest, path: string[]): Promise<NextR
   const responseHeaders = new Headers(upstream.headers);
   responseHeaders.delete('x-frame-options');
   responseHeaders.delete('content-security-policy');
+  // Node's fetch() auto-decompresses the body, so these headers no longer
+  // match the actual payload and cause ERR_CONTENT_DECODING_FAILED.
+  responseHeaders.delete('content-encoding');
+  responseHeaders.delete('content-length');
 
   return new NextResponse(upstream.body, {
     status: upstream.status,

@@ -30,11 +30,11 @@ export default function SupersetEmbed({ dashboardId }: SupersetEmbedProps) {
       return data.token;
     };
 
-    const proxyDomain = `${window.location.origin}/api/superset-proxy`;
+    const supersetDomain = process.env.NEXT_PUBLIC_SUPERSET_URL!;
 
     embedDashboard({
       id: dashboardId,
-      supersetDomain: proxyDomain,
+      supersetDomain,
       mountPoint: container,
       fetchGuestToken,
       referrerPolicy: 'strict-origin-when-cross-origin',
