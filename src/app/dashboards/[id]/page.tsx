@@ -11,7 +11,6 @@ export default function DashboardViewPage() {
   const router = useRouter();
   const dashboardId = params.id as string;
   const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
-  const supersetDomain = process.env.NEXT_PUBLIC_SUPERSET_URL || '';
 
   useEffect(() => {
     fetch('/api/dashboards')
@@ -66,14 +65,7 @@ export default function DashboardViewPage() {
           </button>
         </header>
         <div className="p-0">
-          {supersetDomain ? (
-            <SupersetEmbed
-              dashboardId={dashboardId}
-              supersetDomain={supersetDomain}
-            />
-          ) : (
-            <p className="p-6 text-red-500">NEXT_PUBLIC_SUPERSET_URL is not configured</p>
-          )}
+          <SupersetEmbed dashboardId={dashboardId} />
         </div>
       </main>
     </div>
