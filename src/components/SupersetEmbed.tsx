@@ -54,7 +54,7 @@ export default function SupersetEmbed({ dashboardId }: SupersetEmbedProps) {
   }, [dashboardId]);
 
   return (
-    <div ref={containerRef} className="w-full h-full min-h-[calc(100vh-4rem)]">
+    <div ref={containerRef} className="w-full h-[calc(100vh-4rem)]">
       <div className="flex items-center justify-center h-64 text-gray-500">
         Loading dashboard...
       </div>
