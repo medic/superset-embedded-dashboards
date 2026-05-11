@@ -6,7 +6,22 @@ const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/health'];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
+  // Redirect authenticated users away from login
+  if (pathname.startsWith('/login')) {
+    const token = request.cookies.get('AuthToken')?.value;
+    if (token) {
+      try {
+        const secret = new TextEncoder().encode(process.env.COOKIE_SECRET);
+        await jwtVerify(token, secret, { algorithms: ['HS256'] });
+        return NextResponse.redirect(new URL('/dashboards', request.url));
+      } catch {
+        // Invalid token — fall through to show login page
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // Allow other public routes
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
