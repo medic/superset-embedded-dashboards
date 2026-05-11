@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
+import { NextRequest, NextResponse } from 'next/server';
 import { verifySessionToken } from '@/lib/session';
 import { generateGuestToken } from '@/lib/superset';
 import { getConfig } from '@/lib/config';
@@ -59,8 +59,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ token: guestToken });
   } catch (err: unknown) {
-    Sentry.captureException(err, { tags: { route: 'superset/token' } });
-    console.error('Guest token generation failed:', err instanceof Error ? err.message : err);
+    Sentry.captureException(err);
     return NextResponse.json({ error: 'Failed to generate dashboard token' }, { status: 500 });
   }
 }
