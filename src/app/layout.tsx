@@ -9,8 +9,8 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Dashboard Portal",
-  description: "Secure embedded dashboard portal",
+  title: "eCHIS Analytics",
+  description: "eCHIS Analytics Portal",
 };
 
 export default function RootLayout({

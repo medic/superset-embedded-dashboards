@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       supersetUsername: config.supersetUsername,
       supersetPassword: config.supersetPassword,
       dashboardId,
-      facilityIds: session.facilityIds,
+      facilityId: session.facilityId,
       username: session.username,
     });
 

@@ -25,7 +25,7 @@ describe('authenticateCht', () => {
 
     expect(user).toEqual({
       username: 'cha_user',
-      facilityIds: ['facility-001', 'facility-002'],
+      facilityId: 'facility-001',
       roles: ['chw'],
     });
     expect(mockedAxios.post).toHaveBeenCalledWith(
@@ -44,7 +44,7 @@ describe('authenticateCht', () => {
     });
 
     const user = await authenticateCht(chtDomain, 'cha_user', 'pass');
-    expect(user.facilityIds).toEqual(['facility-001']);
+    expect(user.facilityId).toBe('facility-001');
   });
 
   it('throws on invalid credentials (401)', async () => {
@@ -66,6 +66,6 @@ describe('authenticateCht', () => {
     });
 
     await expect(authenticateCht(chtDomain, 'cha_user', 'pass'))
-      .rejects.toThrow('No facilities assigned');
+      .rejects.toThrow('No facility assigned');
   });
 });
