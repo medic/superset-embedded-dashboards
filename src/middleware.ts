@@ -2,17 +2,33 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
 const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/health'];
+const SECRET = new TextEncoder().encode(process.env.COOKIE_SECRET);
+
+async function verifyToken(token: string): Promise<boolean> {
+  try {
+    await jwtVerify(token, SECRET, { algorithms: ['HS256'] });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
+  if (pathname.startsWith('/login')) {
+    const token = request.cookies.get('AuthToken')?.value;
+    if (token && await verifyToken(token)) {
+      return NextResponse.redirect(new URL('/dashboards', request.url));
+    }
+    return NextResponse.next();
+  }
+
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
-  // Allow static files and Next.js internals
-  if (pathname.startsWith('/_next') || pathname.startsWith('/favicon') || pathname.match(/\.(png|jpg|jpeg|svg|gif|ico|webp)$/)) {
+  if (pathname.startsWith('/_next') || pathname.match(/\.(png|jpg|jpeg|svg|gif|ico|webp)$/)) {
     return NextResponse.next();
   }
 
@@ -21,13 +37,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  try {
-    const secret = new TextEncoder().encode(process.env.COOKIE_SECRET);
-    await jwtVerify(token, secret, { algorithms: ['HS256'] });
+  if (await verifyToken(token)) {
     return NextResponse.next();
-  } catch {
-    return NextResponse.redirect(new URL('/login', request.url));
   }
+  return NextResponse.redirect(new URL('/login', request.url));
 }
 
 export const config = {

@@ -65,13 +65,11 @@ async function getSupersetAuth(
   password: string
 ): Promise<{ accessToken: string; csrfToken: string; csrfCookie: string }> {
   if (cachedAuth && Date.now() < cachedAuth.expiresAt) {
-    console.log('[superset] Using cached auth');
     const { accessToken, csrfToken, csrfCookie } = cachedAuth;
     return { accessToken, csrfToken, csrfCookie };
   }
 
   const loginEndpoint = `${supersetUrl}/api/v1/security/login`;
-  console.log('[superset] Requesting access token', { endpoint: loginEndpoint, username });
   let accessToken: string;
   try {
     const loginResp = await axios.post(loginEndpoint, {
@@ -81,7 +79,6 @@ async function getSupersetAuth(
       refresh: true,
     });
     accessToken = loginResp.data.access_token;
-    console.log('[superset] Access token obtained successfully');
   } catch (err: unknown) {
     const status = axios.isAxiosError(err) ? err.response?.status : undefined;
     const data = axios.isAxiosError(err) ? err.response?.data : undefined;
@@ -90,7 +87,6 @@ async function getSupersetAuth(
   }
 
   const csrfEndpoint = `${supersetUrl}/api/v1/security/csrf_token/`;
-  console.log('[superset] Requesting CSRF token', { endpoint: csrfEndpoint });
   let csrfToken: string;
   let csrfCookie: string;
   try {
@@ -99,7 +95,6 @@ async function getSupersetAuth(
     });
     csrfToken = csrfResp.data.result;
     csrfCookie = csrfResp.headers['set-cookie']?.join('; ') ?? '';
-    console.log('[superset] CSRF token obtained successfully');
   } catch (err: unknown) {
     const status = axios.isAxiosError(err) ? err.response?.status : undefined;
     const data = axios.isAxiosError(err) ? err.response?.data : undefined;
@@ -144,8 +139,6 @@ export async function generateGuestToken(params: GuestTokenParams): Promise<stri
     resources: [{ type: 'dashboard', id: dashboardId }],
     rls: [{ clause: buildRlsClause(facilityId) }],
   };
-  console.log('[superset] Requesting guest token', { endpoint: guestEndpoint, dashboardId, username, facilityId });
-
   try {
     const guestResp = await axios.post(guestEndpoint, payload, {
       headers: {
@@ -154,7 +147,6 @@ export async function generateGuestToken(params: GuestTokenParams): Promise<stri
         Cookie: csrfCookie,
       },
     });
-    console.log('[superset] Guest token obtained successfully');
     return guestResp.data.token;
   } catch (err: unknown) {
     const status = axios.isAxiosError(err) ? err.response?.status : undefined;
