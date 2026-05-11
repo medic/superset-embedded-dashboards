@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const DSN= process.env.SENTRY_DSN as string;
+const rawDSN = process.env.SENTRY_DSN;
+if (!rawDSN) throw new Error('SENTRY_DSN environment variable is required');
+const DSN: string = rawDSN;
 
 /**
  * Proxies error reports to GlitchTip, bypassing ad blockers that block third-party
@@ -11,7 +13,7 @@ const DSN= process.env.SENTRY_DSN as string;
  *
  * @example
  * ```typescript
- * // Configured in sentry.client.config.js via: tunnel: "/api/glitchtip-tunnel"
+ * // Configured in sentry.client.config.ts via: tunnel: "/api/glitchtip-tunnel"
  * // POST /api/glitchtip-tunnel
  * // Body: <sentry envelope payload>
  * // Response 200: { "status": "ok" }
@@ -24,13 +26,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const body = await request.text();
 
-  const response = await fetch(url, {
+  const upstream = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
     body,
   });
 
-  if (!response.ok) {
+  await upstream.text();
+
+  if (!upstream.ok) {
     return NextResponse.json({ error: 'Failed to forward to GlitchTip' }, { status: 500 });
   }
 
