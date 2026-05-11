@@ -1,7 +1,0 @@
-{
-  "database": "dolt",
-  "backend": "dolt",
-  "dolt_mode": "server",
-  "dolt_database": "superset_embedded_dashboards",
-  "project_id": "a0cfd90a-55f5-4ddd-8ced-57809a10b99e"
-}
