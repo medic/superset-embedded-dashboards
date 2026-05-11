@@ -6,28 +6,27 @@ import Link from 'next/link';
 import SupersetEmbed from '@/components/SupersetEmbed';
 import { DashboardConfig } from '@/lib/config';
 import { DashboardIcon, pickIcon, iconTheme } from '@/components/DashboardIcon';
+import { useLogout } from '@/hooks/useLogout';
 
 export default function DashboardViewPage() {
   const params = useParams();
   const router = useRouter();
   const dashboardId = params.id as string;
+  const handleLogout = useLogout();
   const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    fetch('/api/dashboards')
+    const controller = new AbortController();
+    fetch('/api/dashboards', { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error('Unauthorized');
         return res.json();
       })
       .then((data: { dashboards: DashboardConfig[] }) => setDashboards(data.dashboards))
-      .catch(() => router.push('/login'));
+      .catch((err) => { if (err.name !== 'AbortError') router.push('/login'); });
+    return () => controller.abort();
   }, [router]);
-
-  async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
-  }
 
   return (
     <div className="h-screen overflow-hidden">

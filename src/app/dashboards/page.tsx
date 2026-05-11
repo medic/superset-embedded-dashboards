@@ -4,53 +4,27 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DashboardConfig } from '@/lib/config';
-import { DashboardIcon, pickIcon, iconTheme } from '@/components/DashboardIcon';
-
-function cardDescription(name: string): string {
-  const n = name.toLowerCase();
-  if (/(household|family|home)/.test(n))
-    return 'Household registration status, family composition data, and CHV visit coverage broken down by sub-county and community unit.';
-  if (/(pregnan|antenatal|anc|maternal|delivery)/.test(n))
-    return 'ANC attendance rates, skilled delivery coverage, postnatal care follow-up, and maternal health outcome trends across facilities.';
-  if (/(child|under.?5|infant|newborn|neonatal)/.test(n))
-    return 'Under-5 growth monitoring results, malnutrition screening trends, sick-child consultations, and referral completion rates.';
-  if (/(immuniz|vaccin)/.test(n))
-    return 'Vaccine coverage rates by antigen and age cohort, dropout and defaulter tracking, and cold-chain compliance by facility.';
-  if (/(nutrition|growth|stunt|wasting)/.test(n))
-    return 'MUAC screening outcomes, acute malnutrition prevalence, nutrition counselling coverage, and community-level referral rates.';
-  if (/(malaria|tb|hiv|disease|illness|outbreak)/.test(n))
-    return 'Disease incidence and prevalence trends, community-level outbreak alerts, and epidemiological surveillance data by ward.';
-  if (/(community|chu|chv|chp|worker)/.test(n))
-    return 'CHV activity rates, household visit completion, supervision scores, and community unit performance rankings by county.';
-  if (/(performance|coverage|kpi|target)/.test(n))
-    return 'Service coverage KPIs, target vs. achievement tracking, quarter-on-quarter trend analysis, and facility performance benchmarks.';
-  if (/(supervisor|manage)/.test(n))
-    return 'CHP service delivery across Population, Maternal Health, Child Health and WASH — all community services in one view.';
-  if (/(user|engagement|behaviour|behavior|usage)/.test(n))
-    return 'App usage patterns, session activity trends, and user engagement metrics across facilities and counties.';
-  return 'Interactive analytics, data visualisations, and exportable reports for evidence-based programme planning and review.';
-}
+import { DashboardIcon, pickIcon, iconTheme, cardDescription } from '@/components/DashboardIcon';
+import { useLogout } from '@/hooks/useLogout';
 
 export default function DashboardsPage() {
   const router = useRouter();
+  const handleLogout = useLogout();
   const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/dashboards')
+    const controller = new AbortController();
+    fetch('/api/dashboards', { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error('Unauthorized');
         return res.json();
       })
       .then((data) => setDashboards(data.dashboards))
-      .catch(() => router.push('/login'))
+      .catch((err) => { if (err.name !== 'AbortError') router.push('/login'); })
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, [router]);
-
-  async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
-  }
 
   if (loading) {
     return (
@@ -66,7 +40,6 @@ export default function DashboardsPage() {
   return (
     <div className="min-h-screen bg-[#f3f5f4]">
 
-      {/* Top navigation bar */}
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -86,14 +59,13 @@ export default function DashboardsPage() {
           </div>
           <button
             onClick={handleLogout}
-            className="text-sm font-medium font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+            className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors"
           >
             Sign out
           </button>
         </div>
       </header>
 
-      {/* Section hero band */}
       <section className="bg-[#0076A8]">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <p className="text-blue-100 text-xs font-semibold uppercase tracking-widest mb-2">
@@ -107,7 +79,6 @@ export default function DashboardsPage() {
         </div>
       </section>
 
-      {/* Dashboard cards */}
       <main className="max-w-7xl mx-auto px-6 py-10">
         {dashboards.length === 0 ? (
           <div className="text-center py-20 text-slate-400">

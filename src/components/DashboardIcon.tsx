@@ -1,3 +1,26 @@
+export function cardDescription(name: string): string {
+  const n = name.toLowerCase();
+  if (/(household|family|home)/.test(n))
+    return 'Household registration status, family composition data, and CHV visit coverage broken down by sub-county and community unit.';
+  if (/(pregnan|antenatal|anc|maternal|delivery)/.test(n))
+    return 'ANC attendance rates, skilled delivery coverage, postnatal care follow-up, and maternal health outcome trends across facilities.';
+  if (/(child|under.?5|infant|newborn|neonatal)/.test(n))
+    return 'Under-5 growth monitoring results, malnutrition screening trends, sick-child consultations, and referral completion rates.';
+  if (/(immuniz|vaccin)/.test(n))
+    return 'Vaccine coverage rates by antigen and age cohort, dropout and defaulter tracking, and cold-chain compliance by facility.';
+  if (/(nutrition|growth|stunt|wasting)/.test(n))
+    return 'MUAC screening outcomes, acute malnutrition prevalence, nutrition counselling coverage, and community-level referral rates.';
+  if (/(malaria|tb|hiv|disease|illness|outbreak)/.test(n))
+    return 'Disease incidence and prevalence trends, community-level outbreak alerts, and epidemiological surveillance data by ward.';
+  if (/(community|chu|chv|chp|worker)/.test(n))
+    return 'CHV activity rates, household visit completion, supervision scores, and community unit performance rankings by county.';
+  if (/(performance|coverage|kpi|target|supervisor|manage|cadre)/.test(n))
+    return 'CHP service delivery across Population, Maternal Health, Child Health and WASH — all community services in one view.';
+  if (/(user|engagement|behaviour|behavior|usage|activity|adoption)/.test(n))
+    return 'App usage patterns, session activity trends, and user engagement metrics across facilities and counties.';
+  return 'Interactive analytics, data visualisations, and exportable reports for evidence-based programme planning and review.';
+}
+
 export type IconName =
   | 'household'
   | 'pregnancy'

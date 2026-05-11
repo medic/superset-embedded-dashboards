@@ -129,10 +129,10 @@ export default function LoginPage() {
           <div className="lg:hidden text-center mb-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/coat-of-arms.png"
+              src="/kenya-coa.png"
               alt="Ministry of Health"
-              width={200}
-              height={54}
+              width={48}
+              height={45}
               className="mx-auto mb-4 h-10 w-auto"
             />
             <h1 className="text-xl font-semibold text-slate-800">eCHIS Analytics</h1>
@@ -200,10 +200,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 text-white text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ backgroundColor: '#0076A8' }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#1589ba'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0076A8'; }}
+              className="w-full py-2.5 px-4 text-white text-sm font-medium rounded-lg bg-[#0076A8] hover:bg-[#1589ba] transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
