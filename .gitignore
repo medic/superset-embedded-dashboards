@@ -48,6 +48,17 @@ next-env.d.ts
 .vscode/
 .idea/
 
+# local agent/tool state
+.metaswarm/
+.qodo/
+
+# generated husky helper files
+.husky/_/
+
 # other caches
 *.log    
 docs/      
+
+scripts/beads-*
+.beads
+bin/

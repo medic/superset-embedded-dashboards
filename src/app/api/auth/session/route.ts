@@ -6,16 +6,16 @@ import { getConfig } from '@/lib/config';
  * Returns the current user's session payload if a valid AuthToken cookie is present.
  *
  * Verifies the JWT from the `AuthToken` cookie and returns the decoded session
- * containing `username` and `facilityIds`.
+ * containing `username` and `facilityId`.
  *
  * @param request - The incoming request (must include the `AuthToken` cookie).
- * @returns JSON `{ username, facilityIds }` on success, or `{ error }` with 401 status.
+ * @returns JSON `{ username, facilityId }` on success, or `{ error }` with 401 status.
  *
  * @example
  * ```typescript
  * // GET /api/auth/session
  * // Cookie: AuthToken=<valid-jwt>
- * // Response 200: { "username": "cha_jane", "facilityIds": ["fac-001"] }
+ * // Response 200: { "username": "cha_jane", "facilityId": ["fac-001"] }
  * ```
  */
 export async function GET(request: NextRequest) {

@@ -7,14 +7,14 @@ import jwt, { SignOptions } from 'jsonwebtoken';
  * ```typescript
  * const payload: SessionPayload = {
  *   username: 'cha_user',
- *   facilityIds: ['facility-001'],
+ *   facilityId: ['facility-001'],
  *   county: 'nairobi.echis.go.ke',
  * };
  * ```
  */
 export interface SessionPayload {
   username: string;
-  facilityIds: string[];
+  facilityId: string;
   county: string;
 }
 
@@ -29,7 +29,7 @@ export interface SessionPayload {
  * @example
  * ```typescript
  * const token = createSessionToken(
- *   { username: 'cha_user', facilityIds: ['f1'], county: 'nairobi.echis.go.ke' },
+ *   { username: 'cha_user', facilityId: ['f1'], county: 'nairobi.echis.go.ke' },
  *   'my-secret-key-at-least-32-chars!!',
  * );
  * // token is a dot-separated JWT string
@@ -52,10 +52,10 @@ export function createSessionToken(payload: SessionPayload, secret: string, expi
  * ```typescript
  * const decoded = verifySessionToken(token, 'my-secret-key-at-least-32-chars!!');
  * console.log(decoded.username);    // 'cha_user'
- * console.log(decoded.facilityIds); // ['f1']
+ * console.log(decoded.facilityId); // ['f1']
  * ```
  */
 export function verifySessionToken(token: string, secret: string): SessionPayload {
   const decoded = jwt.verify(token, secret) as SessionPayload;
-  return { username: decoded.username, facilityIds: decoded.facilityIds, county: decoded.county };
+  return { username: decoded.username, facilityId: decoded.facilityId, county: decoded.county };
 }

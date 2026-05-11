@@ -5,23 +5,18 @@ jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('buildRlsClause', () => {
-  it('builds IN clause from facility IDs', () => {
-    const clause = buildRlsClause(['fac-001', 'fac-002']);
-    expect(clause).toBe("chu_code IN ('fac-001', 'fac-002')");
+  it('builds equality clause from facility ID', () => {
+    const clause = buildRlsClause('fac-001');
+    expect(clause).toBe("chu_uuid = 'fac-001'");
   });
 
-  it('handles single facility ID', () => {
-    const clause = buildRlsClause(['fac-001']);
-    expect(clause).toBe("chu_code IN ('fac-001')");
-  });
-
-  it('rejects facility IDs with SQL injection characters', () => {
-    expect(() => buildRlsClause(["fac'; DROP TABLE--"]))
+  it('rejects facility ID with SQL injection characters', () => {
+    expect(() => buildRlsClause("fac'; DROP TABLE--"))
       .toThrow('Invalid facility_id format');
   });
 
-  it('rejects empty array', () => {
-    expect(() => buildRlsClause([])).toThrow('At least one facility_id required');
+  it('rejects empty string', () => {
+    expect(() => buildRlsClause('')).toThrow('facility_id is required');
   });
 });
 
@@ -50,7 +45,7 @@ describe('generateGuestToken', () => {
       supersetUsername: 'admin',
       supersetPassword: 'secret',
       dashboardId: 'dash-uuid-1',
-      facilityIds: ['fac-001'],
+      facilityId: 'fac-001',
       username: 'cha_user',
     });
 
@@ -74,7 +69,7 @@ describe('generateGuestToken', () => {
       {
         user: { username: 'cha_user', first_name: 'cha_user', last_name: '' },
         resources: [{ type: 'dashboard', id: 'dash-uuid-1' }],
-        rls: [{ clause: "chu_code IN ('fac-001')" }],
+        rls: [{ clause: "chu_uuid = 'fac-001'" }],
       },
       {
         headers: {
@@ -100,7 +95,7 @@ describe('generateGuestToken', () => {
       supersetUsername: 'admin',
       supersetPassword: 'secret',
       dashboardId: 'dash-uuid-1',
-      facilityIds: ['fac-001'],
+      facilityId: 'fac-001',
       username: 'cha_user',
     })).rejects.toThrow('CSRF fetch failed');
   });

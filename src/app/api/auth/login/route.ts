@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const config = getConfig();
     const user = await authenticateCht(chtDomain, username, password);
     const token = createSessionToken(
-      { username: user.username, facilityIds: user.facilityIds, county: validCounty.domain },
+      { username: user.username, facilityId: user.facilityId, county: validCounty.domain },
       config.cookieSecret
     );
 

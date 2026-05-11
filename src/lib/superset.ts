@@ -4,30 +4,27 @@ const FACILITY_ID_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
 /**
  * Builds a SQL row-level security (RLS) clause that restricts query results
- * to rows matching the given facility IDs. Validates each ID against an
+ * to rows matching the given facility ID. Validates the ID against an
  * allowlist pattern to prevent SQL injection.
  *
- * @param facilityIds - Array of facility ID strings (alphanumeric, hyphens, underscores only).
- * @returns A SQL `IN` clause string, e.g. `"chu_code IN ('fac-001', 'fac-002')"`.
- * @throws Error if the array is empty or any ID contains disallowed characters.
+ * @param facilityId - A facility ID string (alphanumeric, hyphens, underscores only).
+ * @returns A SQL equality clause string, e.g. `"chu_uuid = 'fac-001'"`.
+ * @throws Error if the string is empty or contains disallowed characters.
  *
  * @example
  * ```typescript
- * const clause = buildRlsClause(['fac-001', 'fac-002']);
- * // => "chu_code IN ('fac-001', 'fac-002')"
+ * const clause = buildRlsClause('fac-001');
+ * // => "chu_uuid = 'fac-001'"
  * ```
  */
-export function buildRlsClause(facilityIds: string[]): string {
-  if (facilityIds.length === 0) {
-    throw new Error('At least one facility_id required');
+export function buildRlsClause(facilityId: string): string {
+  if (!facilityId) {
+    throw new Error('facility_id is required');
   }
-  for (const id of facilityIds) {
-    if (!FACILITY_ID_PATTERN.test(id)) {
-      throw new Error(`Invalid facility_id format: ${id}`);
-    }
+  if (!FACILITY_ID_PATTERN.test(facilityId)) {
+    throw new Error(`Invalid facility_id format: ${facilityId}`);
   }
-  const quoted = facilityIds.map((id) => `'${id}'`).join(', ');
-  return `chu_code IN (${quoted})`;
+  return `chu_uuid = '${facilityId}'`;
 }
 
 /**
@@ -40,7 +37,7 @@ export function buildRlsClause(facilityIds: string[]): string {
  *   supersetUsername: 'admin',
  *   supersetPassword: 'secret',
  *   dashboardId: 'dash-uuid-1',
- *   facilityIds: ['fac-001'],
+ *   facilityId: 'fac-001',
  *   username: 'cha_jane',
  * };
  * ```
@@ -50,7 +47,7 @@ export interface GuestTokenParams {
   supersetUsername: string;
   supersetPassword: string;
   dashboardId: string;
-  facilityIds: string[];
+  facilityId: string;
   username: string;
 }
 
@@ -130,14 +127,14 @@ async function getSupersetAuth(
  *   supersetUsername: 'admin',
  *   supersetPassword: 'secret',
  *   dashboardId: 'dash-uuid-1',
- *   facilityIds: ['fac-001'],
+ *   facilityId: 'fac-001',
  *   username: 'cha_jane',
  * });
  * // token is a JWT string for the Superset Embedded SDK
  * ```
  */
 export async function generateGuestToken(params: GuestTokenParams): Promise<string> {
-  const { supersetUrl, supersetUsername, supersetPassword, dashboardId, facilityIds, username } = params;
+  const { supersetUrl, supersetUsername, supersetPassword, dashboardId, facilityId, username } = params;
 
   const { accessToken, csrfToken, csrfCookie } = await getSupersetAuth(supersetUrl, supersetUsername, supersetPassword);
 
@@ -145,9 +142,9 @@ export async function generateGuestToken(params: GuestTokenParams): Promise<stri
   const payload = {
     user: { username, first_name: username, last_name: '' },
     resources: [{ type: 'dashboard', id: dashboardId }],
-    rls: [{ clause: buildRlsClause(facilityIds) }],
+    rls: [{ clause: buildRlsClause(facilityId) }],
   };
-  console.log('[superset] Requesting guest token', { endpoint: guestEndpoint, dashboardId, username, facilityIds });
+  console.log('[superset] Requesting guest token', { endpoint: guestEndpoint, dashboardId, username, facilityId });
 
   try {
     const guestResp = await axios.post(guestEndpoint, payload, {

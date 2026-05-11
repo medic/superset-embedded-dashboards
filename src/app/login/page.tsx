@@ -51,7 +51,7 @@ export default function LoginPage() {
         background: 'radial-gradient(ellipse at top, #f1f0ed 0%, var(--login-bg) 60%)',
       }}
     >
-      <div className="w-full max-w-sm p-10 pt-12 bg-white rounded-2xl shadow-lg shadow-stone-200/60 border border-stone-200/60 animate-fade-in-up">
+      <div className="w-full max-w-md p-10 pt-12 bg-white rounded-2xl shadow-lg shadow-stone-200/60 border border-stone-200/60 animate-fade-in-up">
         <div className="text-center mb-10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

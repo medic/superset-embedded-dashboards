@@ -7,14 +7,14 @@ import axios from 'axios';
  * ```typescript
  * const user: ChtUser = {
  *   username: 'cha_jane',
- *   facilityIds: ['facility-001', 'facility-002'],
+ *   facilityId: 'facility-001',
  *   roles: ['chw'],
  * };
  * ```
  */
 export interface ChtUser {
   username: string;
-  facilityIds: string[];
+  facilityId: string;
   roles: string[];
 }
 
@@ -27,13 +27,13 @@ export interface ChtUser {
  * @param password - The CouchDB password.
  * @returns The authenticated user's info including facility IDs and roles.
  * @throws Error with message "Invalid username or password" on 401 responses.
- * @throws Error with message "No facilities assigned to this user" when the user has no facility_id.
+ * @throws Error with message "No facility assigned to this user" when the user has no facility_id.
  *
  * @example
  * ```typescript
  * const user = await authenticateCht('https://cht.example.com', 'cha_jane', 's3cret');
- * console.log(user.facilityIds); // ['facility-001']
- * console.log(user.roles);       // ['chw']
+ * console.log(user.facilityId); // 'facility-001'
+ * console.log(user.roles);      // ['chw']
  * ```
  */
 export async function authenticateCht(
@@ -67,14 +67,14 @@ export async function authenticateCht(
     headers: { Cookie: sessionCookie },
   });
 
-  const facilityIds = [userDoc.facility_id].flat().filter(Boolean);
-  if (facilityIds.length === 0) {
-    throw new Error('No facilities assigned to this user');
+  const facilityId = [userDoc.facility_id].flat().filter(Boolean)[0];
+  if (!facilityId) {
+    throw new Error('No facility assigned to this user');
   }
 
   return {
     username: userDoc.name,
-    facilityIds,
+    facilityId,
     roles: userDoc.roles || [],
   };
 }
