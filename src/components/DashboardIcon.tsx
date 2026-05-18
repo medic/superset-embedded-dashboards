@@ -17,7 +17,9 @@ export function cardDescription(name: string): string {
   if (/(performance|coverage|kpi|target|supervisor|manage|cadre)/.test(n))
     return 'CHP service delivery across Population, Maternal Health, Child Health and WASH — all community services in one view.';
   if (/(user|engagement|behaviour|behavior|usage|activity|adoption)/.test(n))
-    return 'App usage patterns, session activity trends, and user engagement metrics across facilities and counties.';
+    return 'User session patterns, workflow completion trends, and behavioural analytics.';
+  if (/(client|identity)/.test(n))
+    return 'Client identity resolution coverage and match rates across the Client Registry.';
   return 'Interactive analytics, data visualisations, and exportable reports for evidence-based programme planning and review.';
 }
 
@@ -31,6 +33,7 @@ export type IconName =
   | 'community'
   | 'performance'
   | 'engagement'
+  | 'identity'
   | 'chart';
 
 export const iconTheme: Record<IconName, { bg: string; color: string }> = {
@@ -43,6 +46,7 @@ export const iconTheme: Record<IconName, { bg: string; color: string }> = {
   community:    { bg: '#ede9fe', color: '#6d28d9' },
   performance:  { bg: '#dbeafe', color: '#1d4ed8' },
   engagement:   { bg: '#fdf4ff', color: '#a21caf' },
+  identity:     { bg: '#ccfbf1', color: '#0f766e' },
   chart:        { bg: '#e0e7ff', color: '#4338ca' },
 };
 
@@ -57,6 +61,7 @@ export function pickIcon(name: string): IconName {
   if (/(community|chu|chv|chp|worker)/.test(n)) return 'community';
   if (/(performance|coverage|kpi|target|supervisor|manage|cadre)/.test(n)) return 'performance';
   if (/(user|engagement|behaviour|behavior|usage|activity|adoption)/.test(n)) return 'engagement';
+  if (/(client|identity)/.test(n)) return 'identity';
   return 'chart';
 }
 
@@ -120,8 +125,13 @@ export function DashboardIcon({ name, color, size = 'md' }: { name: IconName; co
     case 'engagement':
       return (
         <svg {...common}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.348 14.651a3.75 3.75 0 0 1 0-5.303m5.304-.001a3.75 3.75 0 0 1 0 5.304m-7.425 2.122a6.75 6.75 0 0 1 0-9.546m9.546.001a6.75 6.75 0 0 1 0 9.545M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.008H12V12Z" />
+        </svg>
+      );
+    case 'identity':
+      return (
+        <svg {...common}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33" />
         </svg>
       );
     default:

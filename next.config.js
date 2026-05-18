@@ -1,14 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  experimental: {
-    instrumentationHook: true,
-    serverComponentsExternalPackages: [
-      '@opentelemetry/instrumentation',
-      'require-in-the-middle',
-      '@sentry/node',
-    ],
+  turbopack: {
+    root: __dirname,
   },
+  serverExternalPackages: [
+    '@opentelemetry/instrumentation',
+    'require-in-the-middle',
+    '@sentry/nextjs',
+    '@sentry/node',
+    '@sentry/core',
+    '@sentry/opentelemetry',
+  ],
 };
 
 module.exports = nextConfig;

@@ -49,10 +49,6 @@ export default function CountySelector({ counties, value, onChange, id }: County
   }, [selectedCounty]);
 
   useEffect(() => {
-    setHighlightedIndex(0);
-  }, [query]);
-
-  useEffect(() => {
     if (isOpen && listRef.current) {
       const item = listRef.current.children[highlightedIndex] as HTMLElement | undefined;
       item?.scrollIntoView({ block: 'nearest' });
@@ -110,12 +106,14 @@ export default function CountySelector({ counties, value, onChange, id }: County
           value={isOpen ? query : (selectedCounty?.name || query)}
           onChange={(e) => {
             setQuery(e.target.value);
+            setHighlightedIndex(0);
             if (!isOpen) setIsOpen(true);
             if (value) onChange('');
           }}
           onFocus={() => {
             setIsOpen(true);
             setQuery(selectedCounty?.name || '');
+            setHighlightedIndex(0);
           }}
           onKeyDown={handleKeyDown}
           placeholder="Search for your county..."
