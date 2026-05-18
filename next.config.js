@@ -7,7 +7,10 @@ const nextConfig = {
   serverExternalPackages: [
     '@opentelemetry/instrumentation',
     'require-in-the-middle',
+    '@sentry/nextjs',
     '@sentry/node',
+    '@sentry/core',
+    '@sentry/opentelemetry',
   ],
 };
 
