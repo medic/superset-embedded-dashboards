@@ -23,8 +23,13 @@ import { getConfig, getCounties } from '@/lib/config';
  * ```
  */
 export async function POST(request: NextRequest) {
+  let county: string | undefined;
+  let username: string | undefined;
   try {
-    const { county, username, password } = await request.json();
+    const body = await request.json();
+    county = body.county;
+    username = body.username;
+    const { password } = body;
     if (!county || !username || !password) {
       return NextResponse.json({ error: 'County, username, and password are required' }, { status: 400 });
     }
@@ -56,7 +61,13 @@ export async function POST(request: NextRequest) {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Authentication failed';
     const status = message.includes('Invalid username') ? 401 : 500;
-    if (status === 500) Sentry.captureException(err);
+    if (status === 500) {
+      Sentry.withScope((scope) => {
+        if (county) scope.setTag('county', county);
+        if (username) scope.setTag('username', username);
+        Sentry.captureException(err);
+      });
+    }
     return NextResponse.json({ error: message }, { status });
   }
 }
