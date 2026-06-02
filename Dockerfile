@@ -12,6 +12,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+ENV SENTRY_DSN=abcd
 RUN npm run build
 
 # Production
