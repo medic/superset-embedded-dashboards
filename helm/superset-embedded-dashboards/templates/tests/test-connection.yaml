@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "superset-embedded-dashboards.fullname" . }}-test-connection"
+  labels:
+    {{- include "superset-embedded-dashboards.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "superset-embedded-dashboards.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
