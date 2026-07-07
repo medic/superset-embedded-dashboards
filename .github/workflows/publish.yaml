@@ -1,5 +1,8 @@
 name: Build image
 
+on:
+  push:
+
 jobs:
   docker:
     runs-on: ubuntu-latest
